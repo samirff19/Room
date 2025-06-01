@@ -1,0 +1,30 @@
+name: Extract ROM Files
+
+on:
+  workflow_dispatch:
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Download MIUI ROM
+        run: |
+          curl -L "https://hugeota.d.miui.com/V13.0.10.0.SKUEUXM/selene_eea_global_images_V13.0.10.0.SKUEUXM_20230321.0000.00_12.0_eea_2d30bf136b.tgz" -o rom.tgz
+
+      - name: Extract boot.img and vbmeta.img
+        run: |
+          mkdir rom
+          tar -xf rom.tgz -C rom
+          find rom -name "boot.img" -exec cp {} ./boot.img \;
+          find rom -name "vbmeta.img" -exec cp {} ./vbmeta.img \;
+
+      - name: Push extracted files
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git add boot.img vbmeta.img
+          git commit -m "Add extracted boot.img and vbmeta.img"
+          git push
